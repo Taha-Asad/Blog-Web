@@ -1,6 +1,6 @@
 const express = require("express");
 const dotenv = require("dotenv");
-const morgan = require("morgan")
+const morgan = require("morgan");
 const cors = require("cors");
 const cookieParser = require("cookie-parser")
 const connectDB = require("./config/db");
@@ -29,9 +29,9 @@ app.use(
 // Routes
 const authRouter = require("./routes/authRouter");
 // Public Routes
-app.use("/api/v1/user" , authRouter)
+app.use("/api/v1/user" , authRouter);
 
 connectDB();
 app.listen(PORT , ()=>{
-    console.log(`Server running successfully on Port: ${PORT}`)
-})
+    console.log(`Server running successfully on Port: ${PORT}`);
+});
