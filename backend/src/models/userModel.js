@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const userSchema =  new mongoose.Schema(
+const userSchema = new mongoose.Schema(
   {
     profilePic: {
       type: String,
@@ -26,6 +26,7 @@ const userSchema =  new mongoose.Schema(
         "Please enter a valid email",
       ],
     },
+    bio: { type: String },
     role: {
       type: String,
       enum: ["user", "admin"],
@@ -41,10 +42,13 @@ const userSchema =  new mongoose.Schema(
       //     "Password must be minimum 6 characters, include at least one uppercase letter, one lowercase letter, one number and one special character",
       //   ],
     },
+    verificationCode: { type: String },
+    verificationCodeExpires: { type: Date },
+    isVerified: { type: Boolean, default: false },
   },
   {
     timestamps: true,
   }
 );
 
-module.exports = mongoose.model("User" , userSchema);
+module.exports = mongoose.model("User", userSchema);

@@ -2,27 +2,31 @@ const userModel = require("../models/userModel");
 const { passwordEncryption, comparePassword } = require("../libs/hashPassword");
 const crypto = require("crypto");
 const generateToken = require("../libs/TokenGen");
+const SendEmail = require("../libs/nodemailer.js");
 const registerUser = async (req, res) => {
   try {
-    const { name, userName, profilePic, email, password, role } = req.body;
-    if (!name || !userName || !email || !password)
-      return res
-        .status(400)
-        .json({ success: false, message: "All Fields are Required" });
+    const { name, userName, profilePic, email, bio, password, role } = req.body;
 
-    const userEmailExistence = await userModel.findOne({
-      email,
-    });
-    if (userEmailExistence)
+    // Validate required fields
+    if (!name || !userName || !email || !password) {
       return res
         .status(400)
-        .json({ success: false, message: "User by This Email Already Exists" });
+        .json({ success: false, message: "All fields are required" });
+    }
+
+    // Check if email exists
+    const userEmailExistence = await userModel.findOne({ email });
+    if (userEmailExistence) {
+      return res.status(400).json({
+        success: false,
+        message: "User with this email already exists",
+      });
+    }
+
     const userNameExistence = await userModel.findOne({ userName });
-
     if (userNameExistence) {
       const randomString = crypto.randomBytes(2).toString("hex");
       const suggestion = `${userName}_${randomString}`;
-
       return res.status(400).json({
         success: false,
         message: "Username already taken",
@@ -31,23 +35,108 @@ const registerUser = async (req, res) => {
     }
 
     const hashedPassword = await passwordEncryption(password);
+
+    const verificationCode = crypto.randomInt(100000, 999999).toString();
+    const expiresInMinutes = 15;
+    const verificationCodeExpiresAt = new Date(
+      Date.now() + expiresInMinutes * 60 * 1000
+    );
     const user = await userModel.create({
       name,
       userName,
       email,
       password: hashedPassword,
       profilePic,
+      bio,
       role: role || "user",
+      isVerified: false,
+      verificationCode,
+      verificationCodeExpires: verificationCodeExpiresAt,
     });
-    if (user) {
-      generateToken(user._id, res);
-      await user.save();
-      return res
-        .status(201)
-        .json({ success: true, message: "User Created Successfully", user });
-    }
+
+    generateToken(user._id, res);
+    const verifyUrl = `${process.env.CLIENT_URL}/verify?email=${user.email}&code=${verificationCode}`;
+
+    await SendEmail(
+      user.email,
+      "Verify your account - Blog Website",
+      "verificationCode",
+      {
+        siteName: "Blog Website",
+        logoUrl: "https://yourcdn.com/logo.png",
+        username: user.userName,
+        purpose: "account verification",
+        verifyUrl,
+        verificationCode,
+        expiresAt: verificationCodeExpiresAt.toLocaleTimeString(),
+        expiresIn: `${expiresInMinutes} minutes`,
+        supportEmail: process.env.EMAIL_USER,
+      }
+    );
+
+    return res.status(201).json({
+      success: true,
+      message:
+        "User created successfully. Please check your email for verification code.",
+      user,
+    });
   } catch (error) {
-    console.error("Error creating User", error.message);
+    console.error("Error creating User:", error.message);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const verifyUser = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Email and code are required" });
+    }
+
+    const user = await userModel.findOne({ email });
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    if (user.isVerified) {
+      return res
+        .status(400)
+        .json({ success: false, message: "User already verified" });
+    }
+
+    // Check code and expiry
+    if (user.verificationCode !== code) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid verification code" });
+    }
+
+    if (
+      user.verificationCodeExpires &&
+      user.verificationCodeExpires < Date.now()
+    ) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Verification code expired" });
+    }
+
+    // Mark user as verified
+    user.isVerified = true;
+    user.verificationCode = undefined; // clear code
+    user.verificationCodeExpires = undefined;
+    await user.save();
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Account verified successfully" });
+  } catch (error) {
+    console.error("Verification error:", error.message);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -91,7 +180,7 @@ const logOutUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-    const { userName, email, password, profilePic } = req.body;
+    const { userName, email, password, profilePic, bio } = req.body;
     const userId = req.user._id;
 
     const existence = await userModel.findOne({ email });
@@ -112,7 +201,7 @@ const updateUser = async (req, res) => {
         suggestion,
       });
     }
-    if (!userName && !email && !password && !profilePic) {
+    if (!userName && !email && !password && !profilePic && !bio) {
       return res.status(400).json({
         success: false,
         message:
@@ -133,6 +222,10 @@ const updateUser = async (req, res) => {
       // Hash password before saving
       const hashedPassword = await passwordEncryption(password);
       updateData.password = hashedPassword;
+    }
+
+    if (bio) {
+      updateData.bio = bio;
     }
 
     // if (profilePic) {
@@ -182,4 +275,5 @@ module.exports = {
   logOutUser,
   updateUser,
   checkAuth,
+  verifyUser,
 };
