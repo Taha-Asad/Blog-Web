@@ -145,7 +145,7 @@ export async function toggleFollow(targetedUserId: string) {
         }),
       ]);
     }
-    revalidatePath("/");
+    revalidatePath("/"); // updates the page like reloading or something
     return { success: true };
   } catch (error) {
     console.log("Error in toggleFollow", error);
