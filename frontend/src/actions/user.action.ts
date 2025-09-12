@@ -29,5 +29,28 @@ export async function syncUser() {
       },
     });
     return dbUser;
-  } catch (error) {}
+  } catch (error) {
+    console.log("Error in syncUser", error);
+  }
+}
+
+export async function getUserbyClerkId(clerkId: string) {
+  try {
+    return prisma.user.findUnique({
+      where: {
+        clerkId
+      } ,
+      include:{
+        _count:{
+          select:{
+            followers:true,
+            following:true,
+            posts:true
+          }
+        }
+      }
+    })
+  } catch (error) {
+    console.log("Error in getUserbyClerkId", error);
+  }
 }
