@@ -10,7 +10,7 @@ async function WhoToFollow() {
     const users = await getRandomUsers();
     if (users.length === 0) return null;
     return (
-        <Card>
+        <Card className='sticky top-20'>
             <CardHeader>
                 <CardTitle>Who to Follow</CardTitle>
             </CardHeader>
