@@ -5,15 +5,16 @@ import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@cl
 import ModeToggle from "./ModeToggle";
 import { currentUser } from "@clerk/nextjs/server";
 import SerachInput from "./SerachInput";
+import { getUnreadNotificationCount } from "@/actions/notification.action";
+import { NotificationButton } from "./NotificationButton";
 
 async function DesktopNavbar() {
     const user = await currentUser();
+    const unreadCount = user ? await getUnreadNotificationCount() : 0;
 
     return (
         <div className="hidden md:flex items-center space-x-4">
-
             <SerachInput />
-
             <ModeToggle />
 
             <Button variant="ghost" className="flex items-center gap-2" asChild>
@@ -25,12 +26,7 @@ async function DesktopNavbar() {
 
             {user ? (
                 <>
-                    <Button variant="ghost" className="flex items-center gap-2" asChild>
-                        <Link href="/notifications">
-                            <BellIcon className="w-4 h-4" />
-                            <span className="hidden lg:inline">Notifications</span>
-                        </Link>
-                    </Button>
+                    <NotificationButton />
                     <Button variant="ghost" className="flex items-center gap-2" asChild>
                         <Link
                             href={`/profile/${user.username ?? user.emailAddresses[0].emailAddress.split("@")[0]

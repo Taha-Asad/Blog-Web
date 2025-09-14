@@ -29,7 +29,6 @@ interface ProfilePageClientProps {
     isFollowing: boolean,
 }
 
-// TODO showing notifications have come indication
 function ProfilePageClient({ user, posts, likedPosts, isFollowing: initialIsFollowing }: ProfilePageClientProps) {
     const { user: currentUser } = useUser();
     const [showEditDialog, setShowEditDialog] = useState(false);

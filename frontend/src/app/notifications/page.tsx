@@ -34,7 +34,13 @@ function Notification() {
                 const data = await getNotifictions();
                 setNotifications(data);
                 const unreadIds = data.filter(n => !n.read).map(n => n.id);
-                if (unreadIds.length > 0) await markNotificationAsRead(unreadIds);
+                if (unreadIds.length > 0) {
+                    await markNotificationAsRead(unreadIds);
+                    // Refetch unread count after marking as read
+                    if (typeof window !== 'undefined') {
+                        window.dispatchEvent(new Event('notificationsRead'));
+                    }
+                }
             } catch (error) {
                 toast.error("Failed To Fetch Notification")
             } finally {

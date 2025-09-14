@@ -23,7 +23,7 @@ export async function getNotifictions() {
         post: {
           select: {
             id: true,
-            title:true,
+            title: true,
             content: true,
             image: true,
           },
@@ -63,5 +63,25 @@ export async function markNotificationAsRead(notificationIds: string[]) {
   } catch (error) {
     console.log("Error in MarkNotificationAsRead", error);
     return { success: false };
+  }
+}
+
+// actions/notification.action.ts
+export async function getUnreadNotificationCount() {
+  try {
+    const userId = await getDbUserId();
+    if (!userId) return 0;
+
+    const count = await prisma.notification.count({
+      where: {
+        userId,
+        read: false,
+      },
+    });
+
+    return count;
+  } catch (error) {
+    console.log("Error in getUnreadNotificationCount", error);
+    return 0;
   }
 }
