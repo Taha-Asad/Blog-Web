@@ -4,12 +4,16 @@ import Link from "next/link";
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import ModeToggle from "./ModeToggle";
 import { currentUser } from "@clerk/nextjs/server";
+import SerachInput from "./SerachInput";
 
 async function DesktopNavbar() {
     const user = await currentUser();
 
     return (
         <div className="hidden md:flex items-center space-x-4">
+
+            <SerachInput />
+
             <ModeToggle />
 
             <Button variant="ghost" className="flex items-center gap-2" asChild>

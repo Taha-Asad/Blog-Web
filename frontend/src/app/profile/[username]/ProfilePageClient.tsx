@@ -29,7 +29,7 @@ interface ProfilePageClientProps {
     isFollowing: boolean,
 }
 
-// TODO need seaarch functionllity to search for different accounts and change thee side bar length with notification showing notifications have come indication
+// TODO showing notifications have come indication
 function ProfilePageClient({ user, posts, likedPosts, isFollowing: initialIsFollowing }: ProfilePageClientProps) {
     const { user: currentUser } = useUser();
     const [showEditDialog, setShowEditDialog] = useState(false);

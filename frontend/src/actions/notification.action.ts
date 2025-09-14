@@ -23,6 +23,7 @@ export async function getNotifictions() {
         post: {
           select: {
             id: true,
+            title:true,
             content: true,
             image: true,
           },

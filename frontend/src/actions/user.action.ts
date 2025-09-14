@@ -181,3 +181,77 @@ export async function toggleFollow(targetedUserId: string) {
     return { success: false, error };
   }
 }
+
+
+export async function searchUsersAdvanced(query: string) {
+  try {
+    if (!query || query.trim().length < 2) return [];
+
+    const searchTerm = query.trim().toLowerCase();
+    
+    const users = await prisma.user.findMany({
+      where: {
+        OR: [
+          { username: { contains: searchTerm, mode: 'insensitive' } },
+          { name: { contains: searchTerm, mode: 'insensitive' } },
+          { posts: { some: { title: { contains: searchTerm, mode: 'insensitive' } } } },
+          { bio: { contains: searchTerm, mode: 'insensitive' } },
+        ],
+      },
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        image: true,
+        bio: true,
+        _count: {
+          select: {
+            followers: true,
+            following: true,
+            posts: {
+              where: {
+                title: {
+                  contains: searchTerm,
+                  mode: 'insensitive',
+                },
+              },
+            },
+          },
+        },
+        posts: {
+          where: {
+            title: {
+              contains: searchTerm,
+              mode: 'insensitive',
+            },
+          },
+          select: {
+            id: true, // ADD POST ID
+            title: true,
+            createdAt: true,
+          },
+          take: 2,
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
+      },
+      take: 15,
+      orderBy: [
+        {
+          posts: {
+            _count: 'desc',
+          },
+        },
+        {
+          username: 'asc',
+        },
+      ],
+    });
+
+    return users;
+  } catch (error) {
+    console.error('Error in advanced search:', error);
+    return [];
+  }
+}

@@ -15,6 +15,7 @@ import { useState } from "react";
 import { useAuth, SignInButton, SignOutButton, SignedOut, SignUpButton, SignedIn, UserButton } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 import Link from "next/link";
+import SearchInput from "./SerachInput";
 
 function MobileNavbar() {
     const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -45,6 +46,7 @@ function MobileNavbar() {
                         <SheetTitle>Menu</SheetTitle>
                     </SheetHeader>
                     <nav className="flex flex-col space-y-4 mt-6">
+                        <SearchInput />
                         <Button variant="ghost" className="flex items-center gap-3 justify-start" asChild>
                             <Link href="/">
                                 <HomeIcon className="w-4 h-4" />

@@ -9,21 +9,24 @@ import { ImageIcon, Loader2Icon, SendIcon } from 'lucide-react';
 import { createPost } from '@/actions/post.action';
 import toast from 'react-hot-toast';
 import ImageUpload from './ImageUpload';
+import { Input } from './ui/input';
 
 function CreatePost() {
     const { user } = useUser();
+    const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [imageUrl, setImageUrl] = useState("");
     const [isPosting, setIsPosting] = useState(false);
     const [showImageUpload, setShowImageUpload] = useState(false);
 
     const handleSubmit = async () => {
-        if (!content.trim() && !imageUrl) return;
-
+        if (!title.trim() && !content.trim() && !imageUrl) return;
+        if (!title.trim()) return toast.error("Title is Compulsory")
         setIsPosting(true)
         try {
-            const result = await createPost(content, imageUrl)
+            const result = await createPost(title, content, imageUrl)
             if (result?.success) {
+                setTitle("");
                 setContent("");
                 setImageUrl("");
                 setShowImageUpload(false);
@@ -41,22 +44,26 @@ function CreatePost() {
     return (
         <Card className='mb-6'>
             <CardContent className="pt-6">
-                <div className="space-y-4">
+                <div className="space-y-5">
                     <div className="flex space-x-4">
                         <Avatar className="w-10 h-10">
                             <AvatarImage src={user?.imageUrl || "/avatar.png"} />
                         </Avatar>
-                        <Textarea
-                            placeholder="What's on your mind?"
-                            className="min-h-[100px] resize-none border-none focus-visible:ring-0 p-0 text-base"
-                            value={content}
-                            onChange={(e) => setContent(e.target.value)}
-                            disabled={isPosting}
-                        />
+                        <div className="flex flex-col w-full">
+                            <Input placeholder='Post Title'
+                                className='w-[100%] border-none mb-5 resize-none focus-visible:ring-0 p-0 text-base'
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                disabled={isPosting} />
+                            <Textarea
+                                placeholder="What's on your mind?"
+                                className="min-h-[100px] pt-5 resize-none border-none focus-visible:ring-0 p-0 text-base"
+                                value={content}
+                                onChange={(e) => setContent(e.target.value)}
+                                disabled={isPosting}
+                            />
+                        </div>
                     </div>
-
-                    {/* TODO: handle Image Uploads */}
-
                     {(showImageUpload || imageUrl) && (
                         <div className="border rounded-lg p-4">
                             <ImageUpload

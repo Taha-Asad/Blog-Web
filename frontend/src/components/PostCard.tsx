@@ -90,7 +90,7 @@ function PostCard({ posts, dbUserId }: { posts: Post, dbUserId: string | null })
                         {/* Post header & text content */}
                         <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between">
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 truncate">
+                                <div className="flex flex-col sm:flex-row sm:items-center mt-1 sm:space-x-2 truncate">
                                     <Link
                                         href={`/profile/${posts.author.username}`}
                                         className="font-semibold truncate"
@@ -109,7 +109,12 @@ function PostCard({ posts, dbUserId }: { posts: Post, dbUserId: string | null })
                                     <DeleteAlertDialog isDeleting={isDeleting} onDelete={handleDeletePost} />
                                 )}
                             </div>
-                            <p className="mt-2 text-sm text-foreground break-words">{posts.content}</p>
+                            <div className="mt-8 p-3 bg-muted/50 rounded-lg -ml-10 sm:-ml-14 md:-ml-14 lg:-ml-14">
+                                <h3 className="text-lg font-semibold text-foreground break-words leading-relaxed">
+                                    {posts.title}
+                                </h3>
+                                <p className="mt-2 text-sm text-foreground break-words">{posts.content}</p>
+                            </div>
                         </div>
                     </div>
                     {/* POST IMAGE */}
