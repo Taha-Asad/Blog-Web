@@ -17,14 +17,41 @@ export async function syncUser() {
       },
     });
 
-    if (existingUser) return existingUser;
+    if (existingUser) {
+      // USER EXISTS - CHECK IF PROFILE NEEDS UPDATE
+      if (
+        existingUser.image !== user.imageUrl ||
+        existingUser.name !==
+          `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+        existingUser.username !==
+          (user.username ?? user.emailAddresses[0].emailAddress.split("@")[0])
+      ) {
+        // Update the user with latest data from Clerk
+        const updatedUser = await prisma.user.update({
+          where: {
+            clerkId: userId,
+          },
+          data: {
+            name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+            username:
+              user.username ??
+              user.emailAddresses[0].emailAddress.split("@")[0],
+            email: user.emailAddresses[0].emailAddress,
+            image: user.imageUrl, // THIS UPDATES THE IMAGE!
+          },
+        });
+        return updatedUser;
+      }
+      return existingUser;
+    }
 
+    // USER DOESN'T EXIST - CREATE NEW USER
     const dbUser = await prisma.user.create({
       data: {
         clerkId: userId,
-        name: `${user.firstName || ""} ${user.lastName || ""}`,
+        name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
         username:
-          user.username ?? user.emailAddresses[0].emailAddress.split("@")[0], // if the user name is provided it splits the the name before the @ sign in gmail
+          user.username ?? user.emailAddresses[0].emailAddress.split("@")[0],
         email: user.emailAddresses[0].emailAddress,
         image: user.imageUrl,
       },

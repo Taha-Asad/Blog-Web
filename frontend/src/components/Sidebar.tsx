@@ -8,6 +8,7 @@ import { LinkIcon, MapPinIcon } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarImage } from './ui/avatar';
 import { Separator } from './ui/separator';
+import { FreshAvatar } from './FreashAvatar';
 
 async function Sidebar() {
   const authUser = await currentUser();
@@ -16,7 +17,6 @@ async function Sidebar() {
   if (!user)
     return null;
 
-  console.log({user})
   return (
     <div className='sticky top-20'>
       <Card>
@@ -26,9 +26,11 @@ async function Sidebar() {
               href={`/profile/${user.username}`}
               className="flex flex-col items-center justify-center"
             >
-              <Avatar className="w-20 h-20 border-2 ">
-                <AvatarImage src={user.image || "/avatar.png"} />
-              </Avatar>
+              <FreshAvatar
+                src={user.image || "/avatar.png"} // Database now has updated image
+                className="border-2"
+                size="xl"
+              />
 
               <div className="mt-4 space-y-1">
                 <h3 className="font-semibold">{user.name}</h3>
