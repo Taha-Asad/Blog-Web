@@ -187,7 +187,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "D:\\Work\\Development\\Projects\\Projects\\SkillifyZone\\Blog-Web\\frontend\\src\\generated\\prisma",
+      "value": "/media/tahaasad/01DB6834D37CEF50/Work/Development/Projects/Projects/SkillifyZone/Blog-Web/src/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -196,12 +196,20 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "windows",
+        "value": "debian-openssl-3.0.x",
         "native": true
+      },
+      {
+        "fromEnvVar": null,
+        "value": "windows"
+      },
+      {
+        "fromEnvVar": null,
+        "value": "debian-openssl-3.0.x"
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "D:\\Work\\Development\\Projects\\Projects\\SkillifyZone\\Blog-Web\\frontend\\prisma\\schema.prisma",
+    "sourceFilePath": "/media/tahaasad/01DB6834D37CEF50/Work/Development/Projects/Projects/SkillifyZone/Blog-Web/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -215,6 +223,7 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
@@ -223,8 +232,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id        String   @id @default(cuid())\n  email     String   @unique\n  username  String   @unique\n  clerkId   String   @unique\n  name      String?\n  bio       String?\n  image     String?\n  location  String?\n  website   String?\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  // Relations : related to the specific user e.g a post is authored by user so they have a relation with reach other\n\n  posts    Post[] //One to many \n  comments Comment[] //One to many\n  likes    Like[] // one to many\n\n  followers Follow[] @relation(\"following\") // People following the certain User\n  following Follow[] @relation(\"follower\") // People Followed by the certain user\n\n  notifications        Notification[] @relation(\"userNotifications\") // notifications recived by user\n  notificationsCreated Notification[] @relation(\"notificationCreator\") // notification triggered by user\n}\n\nmodel Post {\n  id        String   @id @default(cuid())\n  title     String\n  authorId  String\n  content   String?\n  image     String?\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n  // Relations of Post to other models\n\n  author User @relation(fields: [authorId], references: [id], onDelete: Cascade) // Cascade dlt all the posts created by the user if the user deletes his account\n\n  comments      Comment[]\n  likes         Like[]\n  notifications Notification[]\n}\n\nmodel Comment {\n  id        String   @id @default(cuid())\n  content   String\n  authorId  String\n  postId    String\n  createdAt DateTime @default(now())\n\n  author       User           @relation(fields: [authorId], references: [id], onDelete: Cascade)\n  post         Post           @relation(fields: [postId], references: [id], onDelete: Cascade)\n  notification Notification[]\n\n  @@index([authorId, postId]) // filter post id by a specific user id : composite index for faster queries\n}\n\nmodel Like {\n  id        String   @id @default(cuid())\n  postId    String\n  userId    String\n  createdAt DateTime @default(now())\n\n  // Relations\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)\n  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)\n\n  @@unique([userId, postId]) // Prevents a user from liking more then one time \n  @@index([userId, postId]) // serach about it dont understand it\n}\n\nmodel Follow {\n  followerId  String\n  followingId String\n  createdAt   DateTime @default(now())\n\n  // relations\n  follower  User @relation(\"follower\", fields: [followerId], references: [id], onDelete: Cascade)\n  following User @relation(\"following\", fields: [followingId], references: [id], onDelete: Cascade)\n\n  @@id([followerId, followingId]) // composit binary key thats Prevents duplicate follwers or following\n  @@index([followerId, followingId])\n}\n\nmodel Notification {\n  id        String           @id @default(cuid())\n  userId    String\n  creatorId String\n  type      NotificationType\n  read      Boolean          @default(false)\n  postId    String?\n  commentId String?\n  createdAt DateTime         @default(now())\n\n  //Releations\n  user    User     @relation(\"userNotifications\", fields: [userId], references: [id], onDelete: Cascade)\n  creator User     @relation(\"notificationCreator\", fields: [creatorId], references: [id], onDelete: Cascade)\n  post    Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)\n  comment Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)\n\n  @@index([userId, createdAt])\n}\n\nenum NotificationType {\n  LIKE\n  COMMENT\n  FOLLOW\n}\n",
-  "inlineSchemaHash": "5412ac68d82871068e6eeb4ccc0eea792a881c664fde17cfe55ff07df233183b",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider      = \"prisma-client-js\"\n  output        = \"../src/generated/prisma\"\n  binaryTargets = [\"native\", \"windows\", \"debian-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id        String   @id @default(cuid())\n  email     String   @unique\n  username  String   @unique\n  clerkId   String   @unique\n  name      String?\n  bio       String?\n  image     String?\n  location  String?\n  website   String?\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  // Relations : related to the specific user e.g a post is authored by user so they have a relation with reach other\n\n  posts    Post[] //One to many \n  comments Comment[] //One to many\n  likes    Like[] // one to many\n\n  followers Follow[] @relation(\"following\") // People following the certain User\n  following Follow[] @relation(\"follower\") // People Followed by the certain user\n\n  notifications        Notification[] @relation(\"userNotifications\") // notifications recived by user\n  notificationsCreated Notification[] @relation(\"notificationCreator\") // notification triggered by user\n}\n\nmodel Post {\n  id        String   @id @default(cuid())\n  title     String\n  authorId  String\n  content   String?\n  image     String?\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n  // Relations of Post to other models\n\n  author User @relation(fields: [authorId], references: [id], onDelete: Cascade) // Cascade dlt all the posts created by the user if the user deletes his account\n\n  comments      Comment[]\n  likes         Like[]\n  notifications Notification[]\n}\n\nmodel Comment {\n  id        String   @id @default(cuid())\n  content   String\n  authorId  String\n  postId    String\n  createdAt DateTime @default(now())\n\n  author       User           @relation(fields: [authorId], references: [id], onDelete: Cascade)\n  post         Post           @relation(fields: [postId], references: [id], onDelete: Cascade)\n  notification Notification[]\n\n  @@index([authorId, postId]) // filter post id by a specific user id : composite index for faster queries\n}\n\nmodel Like {\n  id        String   @id @default(cuid())\n  postId    String\n  userId    String\n  createdAt DateTime @default(now())\n\n  // Relations\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)\n  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)\n\n  @@unique([userId, postId]) // Prevents a user from liking more then one time \n  @@index([userId, postId]) // serach about it dont understand it\n}\n\nmodel Follow {\n  followerId  String\n  followingId String\n  createdAt   DateTime @default(now())\n\n  // relations\n  follower  User @relation(\"follower\", fields: [followerId], references: [id], onDelete: Cascade)\n  following User @relation(\"following\", fields: [followingId], references: [id], onDelete: Cascade)\n\n  @@id([followerId, followingId]) // composit binary key thats Prevents duplicate follwers or following\n  @@index([followerId, followingId])\n}\n\nmodel Notification {\n  id        String           @id @default(cuid())\n  userId    String\n  creatorId String\n  type      NotificationType\n  read      Boolean          @default(false)\n  postId    String?\n  commentId String?\n  createdAt DateTime         @default(now())\n\n  //Releations\n  user    User     @relation(\"userNotifications\", fields: [userId], references: [id], onDelete: Cascade)\n  creator User     @relation(\"notificationCreator\", fields: [creatorId], references: [id], onDelete: Cascade)\n  post    Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)\n  comment Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)\n\n  @@index([userId, createdAt])\n}\n\nenum NotificationType {\n  LIKE\n  COMMENT\n  FOLLOW\n}\n",
+  "inlineSchemaHash": "b4e856f2f7675c5274db4466862113eb4db95f35ed46314262a3a2a50f92f2e2",
   "copyEngine": true
 }
 config.dirname = '/'
